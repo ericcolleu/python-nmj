@@ -54,9 +54,9 @@ class TTVDB3Scanner(TVShowScanner):
         raise MediaNotFound("No information found for %s" % media)
 
     def get_season_posters(self, obj, season):
-        return [TVDBImage(banner.ThumbnailPath) for banner in sorted(obj.banner_objects, key=operator.attrgetter("Rating"), reverse=True) if banner.BannerType == "season" and banner.Season == season]
+        return [TVDBImage(banner.ThumbnailPath) for banner in sorted(obj.banner_objects, key=operator.attrgetter("Rating"), reverse=True) if banner.BannerType == "season" and banner.Season == season and banner.Language in ("fr", "en")]
     def get_season_thumbnails(self, obj, season):
-        return [NMJImage(banner.banner_url) for banner in sorted(obj.banner_objects, key=operator.attrgetter("Rating"), reverse=True) if banner.BannerType == "season" and banner.Season == season]
+        return [NMJImage(banner.banner_url) for banner in sorted(obj.banner_objects, key=operator.attrgetter("Rating"), reverse=True) if banner.BannerType == "season" and banner.Season == season and banner.Language in ("fr", "en")]
     def get_banners(self, obj, type="poster"):
         return [NMJImage(banner.banner_url) for banner in sorted(obj.banner_objects, key=operator.attrgetter("Rating"), reverse=True) if banner.BannerType == type]
 
@@ -76,7 +76,10 @@ class TTVDB3Scanner(TVShowScanner):
         #print_details(episode)
         episode_title = episode.EpisodeName
         #str_actors = [] show.get("actors", "").strip("|")
-        print_details(show.actor_objects[0])
+        #print_details(show.actor_objects[0])
+        print_details(show.banner_objects[0])
+        _LOGGER.debug("Banner (rating, language) : %s", [(banner.Rating, banner.Language) for banner in show.banner_objects])
+        _LOGGER.debug("Sorted Banner (rating, language) : %s", [(banner.Rating, banner.Language, banner.BannerPath) for banner in sorted(show.banner_objects, key=operator.attrgetter("Rating"), reverse=True) if banner.BannerType == "season" and banner.Season == search_result.season and banner.Language in ("fr", "en") ])
         main_actors = [NMJPerson(actor.Name, NMJ_ACTOR, images=[TVDBImage(actor.Image)]) for actor in show.actor_objects]
         director = [NMJPerson(director, NMJ_DIRECTOR) for director in episode.Director]
         #str_guests = episode.get("gueststars", None) or ""
@@ -136,7 +139,7 @@ if __name__ == "__main__": # pragma: no cover
     import sys
     from nmj.abstract import MediaFile
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     scanner = TTVDB3Scanner()
     for video in sys.argv[1:]:
         search_result=scanner.search(MediaFile(video))

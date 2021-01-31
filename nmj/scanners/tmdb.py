@@ -53,7 +53,7 @@ class TMDBScanner(MovieScanner):
 		title = self.clean(os.path.basename(os.path.splitext(media.path)[0]))
 		try:
 			searcher = tmdb.Search()
-			searcher.movie(query=to_unicode(title), language='fr')
+			searcher.movie(query=to_unicode(title), language='fr-FR')
 			for movie in searcher.results:
 				try:
 					_LOGGER.debug("Search result : %s", movie)
@@ -82,7 +82,7 @@ class TMDBScanner(MovieScanner):
 	def get_details_from_id(self, media_id):
 		_LOGGER.info("Retreiving details on movie %s", media_id)
 		movie = tmdb.Movies(media_id)
-		movie_info = movie.info(language='fr')
+		movie_info = movie.info(language='fr-FR')
 		images = movie.images(language='fr,en,null')
 		credits = movie.credits()
 		#pprint(movie_info)
@@ -141,12 +141,15 @@ class TMDBScanner(MovieScanner):
 
 if __name__ == "__main__": # pragma: no cover
 	from nmj.abstract import MediaFile
+	from nmj.utils import print_details
+	import sys
 
 	logging.basicConfig(level=logging.DEBUG)
 	scanner = TMDBScanner()
 	#scanner.get_details(MovieSearchResult(160320, "http://d3gtl9l2a4fn1j.cloudfront.net/t/p/original/ejre3MX3Yf8vfjxjkhMV96nBJdp.jpg", "One Day...", "path"))
-	result = scanner.get_details(scanner.search(MediaFile("Avatar.avi"))[0])
-	pprint(result.wallpapers)
+	result = scanner.get_details(scanner.search(MediaFile(sys.argv[1]))[0])
+	print_details(result)
+	#pprint(result.wallpapers)
 # 	for attr in dir(result):
 # 		if not attr.startswith("_"):
 # 			print("%s : %s" % (attr, getattr(result, attr)))

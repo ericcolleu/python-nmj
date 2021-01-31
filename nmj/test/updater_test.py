@@ -103,7 +103,7 @@ class NMJUpdaterTestCase(unittest.TestCase):
 			self.create_file(filename)
 		updater = NMJUpdater(self.root_path, "popcorn/path/to/the/library")
 		medias = updater.scan_dir()
-		self.assertEqual(4, len(medias))
+		self.assertEqual(5, len(medias))
 		for media in medias:
 			self.assertIsInstance(media, MediaFile)
 			updater.search_media_and_add(media)
