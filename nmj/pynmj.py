@@ -3,7 +3,7 @@ import logging
 import optparse
 import os
 import time
-
+from progress.bar import Bar, ShadyBar
 from nmj.updater import NMJUpdater
 
 
@@ -32,8 +32,8 @@ def parse_options():
 	return parser.parse_args()
 
 def main():
-	logging.basicConfig(level=logging.DEBUG)
-	_LOGGER.setLevel(logging.INFO)
+	logging.basicConfig(level=logging.INFO, filename="pynmj.log")
+	#_LOGGER.setLevel(logging.INFO)
 	options, arguments = parse_options()
 	try:
 		try:
@@ -43,12 +43,15 @@ def main():
 				updater.clean_names()
 			medias = updater.scan_dir()
 			_LOGGER.info("Found %s medias", len(medias))
+			bar = ShadyBar('Updating database', max=len(medias), suffix='[ETA %(eta_td)s] (%(percent)d%%)')
 			for rank, media in enumerate(medias):
 				_LOGGER.info("Media %s/%s", rank+1, len(medias))
 				updater.search_media_and_add(media)
+				bar.next()
 			_LOGGER.info("Cleaning DB...")
 			updater.clean()
 			_LOGGER.info("Done")
+			bar.finish()
 		except:
 			import traceback;traceback.print_exc()
 	finally:

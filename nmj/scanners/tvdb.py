@@ -101,8 +101,8 @@ class TTVDBScanner(TVShowScanner):
         #str_genres = show.get("genre", "").strip("|")
         genres = show["genre"]
         banners = show["_banners"]
-        #pprint.pprint(banners)
-        #print(banners.keys())
+        # pprint.pprint(banners)
+        # print(banners.keys())
         #pprint.pprint(show)
         return NMJTVMediaInfo(
                 show = NMJTVShow(
@@ -153,13 +153,14 @@ class TTVDBScanner(TVShowScanner):
 
 
 if __name__ == "__main__": # pragma: no cover
+    import sys
     from nmj.abstract import MediaFile
 
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     scanner = TTVDBScanner()
-    search_res = scanner.search(MediaFile("person.of.interest.s01e01.avi"))
+    search_res = scanner.search(MediaFile(sys.argv[1]))
     result = scanner.get_details(search_res[0])
-    print(result)
-    result.show.download_poster()
-    result.show.download_thumbnail()
-    result.show.download_wallpaper()
+    # print(result)
+    print(type(result.show.release_date))
+    # result.show.download_thumbnail()
+    #result.show.download_wallpapers()

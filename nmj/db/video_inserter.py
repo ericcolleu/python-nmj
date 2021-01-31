@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
+from nmj.utils import print_details
 import string
 
 from nmj.abstract import NMJ_DIRECTOR, NMJ_ACTOR
@@ -88,6 +89,7 @@ class VideoDBInserter(ShowFinder):
 		return media_info.persons
 
 	def _get_group(self, movie_info):
+		print_details(movie_info)
 		if not movie_info.search_title:
 			return self.db.get_tables_items(ShowGroups, name="0-9")[0].id
 		first_letter = movie_info.search_title[0]

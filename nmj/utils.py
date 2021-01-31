@@ -3,7 +3,13 @@ import locale
 import os
 import requests
 import shutil
+import logging
+import tempfile
+import PIL
+from PIL import Image
 
+
+_LOGGER = logging.getLogger(__name__)
 def to_unicode(text):
 	if isinstance(text, str):
 		return text
@@ -25,17 +31,36 @@ def to_unicode(text):
 
 	return str(text, 'latin1')
 
+def resize_image(orig, dest, width):
+	img = Image.open(orig)
+	wpercent = (width/float(img.size[0]))
+	hsize = int((float(img.size[1])*float(wpercent)))
+	img = img.resize((width,hsize), PIL.Image.ANTIALIAS)
+	img.save(dest)
 
-def download_image(url, filepath):
+def download_image(url, filepath, width=None):
+	if os.path.isfile(filepath):
+		return
 	if not os.path.isdir(os.path.dirname(filepath)):
 		os.makedirs(os.path.dirname(filepath))
-	# r = requests.get(url, stream=True)
-	# if r.status_code == 200:
-	# 	with open(filepath, 'wb') as f:
-	# 		for chunk in r.iter_content(1024):
-	# 			f.write(chunk)
 	r = requests.get(url, stream=True)
 	if r.status_code == 200:
-		with open(filepath, 'wb') as f:
+		with tempfile.NamedTemporaryFile() as f:
 			r.raw.decode_content = True
-			shutil.copyfileobj(r.raw, f) 
+			shutil.copyfileobj(r.raw, f)
+			if width:
+				resize_image(f.name, filepath, width)
+			else:
+				shutil.copyfile(f.name, filepath)
+
+def print_details(object_, prefix="", logger=None):
+	logger = logger or _LOGGER
+	logger.debug("%s %s details (%s):", prefix, object, type(object_))
+	logger.debug("%s %s:", prefix, dir(object_))
+	for attr in dir(object_):
+		if not attr.startswith("__"):
+			try:
+				logger.debug("%s %s = %s", prefix, attr, getattr(object_, attr))
+			except:
+				logger.debug("%s %s = Unknown value", prefix, attr)
+			

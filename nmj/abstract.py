@@ -173,10 +173,10 @@ class NMJImage(Printable):
 		self.filename = os.path.basename(url)
 		self.url = url
 
-	def download(self, base_dir, prefix):
+	def download(self, base_dir, prefix, width=None):
 		relative_path = "%s%s" % (prefix, self.filename)
-		_LOGGER.info("Downloading image in %s from %s", os.path.join(base_dir, relative_path), self.url)
-		download_image(self.url, os.path.join(base_dir, relative_path))
+		_LOGGER.debug("Downloading image in %s from %s", os.path.join(base_dir, relative_path), self.url)
+		download_image(self.url, os.path.join(base_dir, relative_path), width=width)
 		return relative_path
 
 	def do_str(self):
@@ -210,8 +210,11 @@ class NMJImageDownloader(object):
 	def download_wallpaper(self):
 		if not self.wallpapers:
 			return False
-		self.wallpaper_path = self.wallpapers[0].download(self.base_dir, os.path.join("nmj_database", "media", "video", "poster", "wallpaper_"))
+		self.wallpaper_path = self.wallpapers[0].download(self.base_dir, os.path.join("nmj_database", "media", "video", "poster", "wallpaper_"), width=1920)
 		return True
+
+	def download_wallpapers(self):
+		[wallpaper.download(self.base_dir, os.path.join("nmj_database", "media", "video", "poster", "wallpaper_")) for wallpaper in self.wallpapers]
 
 class NMJMovie(Printable, NMJImageDownloader):
 	poster_sizes = ['w92', 'w154', 'w185', 'w342', 'w500', 'original']
@@ -333,8 +336,9 @@ class NMJTVMediaInfo(Printable):
 	def do_str(self):
 		return "NMJTVMediaInfo: %s (%s, %s)" % (self.show, self.season, self.episode)
 
-class NMJPerson(Printable):
-	def __init__(self, name, job):
+class NMJPerson(Printable, NMJImageDownloader):
+	def __init__(self, name, job, images=None):
+		NMJImageDownloader.__init__(self, posters=images or [])
 		self.name = name
 		self.job = job
 		self.db_id = None

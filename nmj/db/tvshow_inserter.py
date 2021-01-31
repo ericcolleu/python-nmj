@@ -13,7 +13,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class TVShowDBInserter(VideoDBInserter):
 	def _insert_show(self, media_info):
-		if not self.db.get_tables_items(Shows, ttid=media_info.show.ttid, title_type=SHOW_TITLE_TYPE):
+		shows = self.db.get_tables_items(Shows, ttid=media_info.show.ttid, title_type=SHOW_TITLE_TYPE)
+		if not shows:
 			release_date = datetime.datetime.strptime(media_info.show.release_date, "%Y-%m-%d")
 			show_id = self.db.insert(
 				Shows,
@@ -39,12 +40,13 @@ class TVShowDBInserter(VideoDBInserter):
 			self._insert_groups(show_id, media_info.show, title_type=SHOW_TITLE_TYPE)
 			return show_id
 		else:
-			return self.db.get_tables_items(Shows, ttid=media_info.show.ttid, title_type=SHOW_TITLE_TYPE)[0].id
+			return shows[0].id
 
 	def _insert_season(self, media_info):
-		if not self.db.get_tables_items(Shows, title=media_info.season.title, title_type=SEASON_TITLE_TYPE):
+		seasons = self.db.get_tables_items(Shows, title=media_info.season.title, title_type=SEASON_TITLE_TYPE)
+		if not seasons:
 			release_date = datetime.datetime.strptime(media_info.season.release_date, "%Y-%m-%d")
-			show_id = self.db.insert(
+			season_id = self.db.insert(
 				Shows,
 				title=media_info.season.title,
 				search_title=media_info.season.search_title,
@@ -59,20 +61,20 @@ class TVShowDBInserter(VideoDBInserter):
 				content_ttid=media_info.season.content_id,
 				three_d="0",
 			)
-			self.db.insert(VideoProperties, id=show_id, runtime=0)
-			self.db.insert(VideoPosters, id=show_id, type="0", create_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-			self.db.insert(Synopsises, id=show_id, summary=media_info.season.synopsis)
-			self._insert_genres(show_id, media_info.season)
-			self._insert_persons(show_id, media_info.season)
-			self._insert_groups(show_id, media_info.season, title_type=SEASON_TITLE_TYPE)
-			return show_id
+			self.db.insert(VideoProperties, id=season_id, runtime=0)
+			self.db.insert(VideoPosters, id=season_id, type="0", create_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+			self.db.insert(Synopsises, id=season_id, summary=media_info.season.synopsis)
+			self._insert_genres(season_id, media_info.season)
+			self._insert_persons(season_id, media_info.season)
+			self._insert_groups(season_id, media_info.season, title_type=SEASON_TITLE_TYPE)
+			return season_id
 		else:
-			return self.db.get_tables_items(Shows, title=media_info.season.title, title_type=SEASON_TITLE_TYPE)[0].id
+			return seasons[0].id
 
 	def _insert_episode(self, media_info, show_id, season_id):
 		if not self.show:
 			release_date = datetime.datetime.strptime(media_info.episode.release_date, "%Y-%m-%d")
-			db_show_id = self.db.insert(
+			db_episode_id = self.db.insert(
 				Shows,
 				title=media_info.episode.title,
 				search_title=media_info.episode.search_title,
@@ -92,14 +94,14 @@ class TVShowDBInserter(VideoDBInserter):
 			self.db.update(Shows, show_id, total_item=show.total_item+1)
 			self.db.update(Shows, season_id, total_item=season.total_item+1)
 
-			self.db.insert(ShowsVideos, shows_id=db_show_id, videos_id=self.video_id)
-			self.db.insert(Synopsises, id=db_show_id, summary=media_info.episode.synopsis)
-			self.db.insert(VideoProperties, id=db_show_id, runtime=media_info.episode.runtime)
-			self.db.insert(VideoPosters, id=db_show_id, type="0", create_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-			self.db.insert(Episodes, episode_id=db_show_id, series_id=show_id, season_id=season_id, season=media_info.season.rank, episode=media_info.episode.rank)
-			self._insert_genres(db_show_id, media_info.episode)
-			self._insert_persons(db_show_id, media_info.episode)
-			return db_show_id
+			self.db.insert(ShowsVideos, shows_id=db_episode_id, videos_id=self.video_id)
+			self.db.insert(Synopsises, id=db_episode_id, summary=media_info.episode.synopsis)
+			self.db.insert(VideoProperties, id=db_episode_id, runtime=media_info.episode.runtime)
+			self.db.insert(VideoPosters, id=db_episode_id, type="0", create_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+			self.db.insert(Episodes, episode_id=db_episode_id, series_id=show_id, season_id=season_id, season=media_info.season.rank, episode=media_info.episode.rank)
+			self._insert_genres(db_episode_id, media_info.episode)
+			self._insert_persons(db_episode_id, media_info.episode)
+			return db_episode_id
 		else:
 			return self.show.id
 

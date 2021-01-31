@@ -13,7 +13,7 @@ from nmj.db.tvshow_inserter import TVShowDBInserter
 from nmj.scanner_factory import ScannerFactory, ScannerNotFound, \
 	UnknownMediaType
 from nmj.scanners.tmdb import MediaNotFound, TMDBScanner
-#from nmj.scanners.tvdb3 import TTVDB3Scanner
+from nmj.scanners.tvdb3 import TTVDB3Scanner
 from nmj.scanners.tvdb import TTVDBScanner
 from nmj.tables import Videos, ShowsVideos, Shows, Synopsises, VideoPosters, \
 	Episodes
@@ -80,6 +80,14 @@ class NMJVideo(object):
 		self.basename = os.path.basename(relative_path)
 
 class NMJUpdater(object):
+	INDEX = """<html><head><meta name="Author" content="NMJ"></meta><meta HTTP-EQUIV="Content-Type" content="text/html; charset=UTF-8"></meta>
+<script type="text/javascript">
+<!--
+fixedPath=location.href.replace("index.htm","?filter=7&page=1");
+document.write('<meta HTTP-EQUIV="REFRESH" content="0; url='+fixedPath.replace("file:///opt/sybhttpd/localhost.drives","http://localhost.drives:8883")+'"></meta>');
+-->
+</script>
+</head></html>"""
 	inserters={
 		MOVIE_MEDIA_TYPE : MovieDBInserter,
 		TVSHOW_EPISODE_MEDIA_TYPE : TVShowDBInserter,
@@ -91,9 +99,17 @@ class NMJUpdater(object):
 		self.scanner_factory = ScannerFactory()
 		self.db = DBProxy(root_path, popcorn_path)
 		self.base_dir = root_path
+		index = os.path.join(self.base_dir, "index.htm")
+		if not os.path.isfile(index):
+			with open(index, "w+") as f:
+				f.write(self.INDEX)
 		if not self.base_dir.endswith("/"):
 			self.base_dir+="/"
-		self.scanner_factory.register_scanner(TTVDBScanner(), TMDBScanner())
+		self.scanner_factory.register_scanner(
+			#TTVDBScanner(), 
+			TTVDB3Scanner(), 
+			TMDBScanner(),
+		)
 
 	def get_image(self):
 		image_path=os.path.join(self.base_dir, "%s.jpg" % os.path.basename(self.base_dir[:-1]))
