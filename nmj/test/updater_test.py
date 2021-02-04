@@ -173,10 +173,40 @@ class NMJUpdaterTestCase(unittest.TestCase):
 		# self.__check_show_attributes(season, "Mentalist Saison 1", "Mentalist Saison 1", 1, "2008", SEASON_TITLE_TYPE)
 		# self.__check_show_attributes(episode, "John le Rouge", "John le Rouge", 1, "2008", MOVIE_TYPE)
 		
+	def test_08a(self):
+		"Updater: scan directory"
+		library = [
+			"avatar.avi",
+			"gladiator.iso",
+			"toy.story 1.mkv",
+			"toy.story 2.mkv",
+			"toy.story 3.mkv",
+			"toy.story 4.mkv",
+			"star.wars.avi",
+			"star.wars 2.avi",
+			"star.wars 3.avi",
+			"star.wars 4.avi",
+			"star.wars 5.avi",
+			"star.wars 6.avi",
+			"star.wars 7.avi",
+		]
+		for filename in library:
+			self.create_file(filename)
+		updater = NMJUpdater(self.root_path, "popcorn/path/to/the/library")
+		medias = updater.scan_dir()
+		for rank, media in enumerate(medias):
+			updater.search_media_and_add(media)
+
+		shows = updater.get_shows(pageSize=5, pageIndex=1)
+		self.assertEqual(5, len(shows))
+		shows = updater.get_shows(pageSize=5, pageIndex=2)
+		self.assertEqual(5, len(shows))
+		shows = updater.get_shows(pageSize=5, pageIndex=3)
+		self.assertEqual(3, len(shows))
 
 
 if __name__ == "__main__":
-	logging.basicConfig(level=logging.ERROR)
+	logging.basicConfig(level=logging.INFO)
 	#logging.getLogger("nmj.updater").setLevel(logging.INFO)
 	logging.getLogger("test").setLevel(logging.INFO)
 	unittest.main()

@@ -286,10 +286,10 @@ document.write('<meta HTTP-EQUIV="REFRESH" content="0; url='+fixedPath.replace("
 		show = self.db.get_first(Shows, id=show_id)
 		return show.total_item > 1 and show.title_type == SHOW_TITLE_TYPE
 	
-	def get_shows(self):
+	def get_shows(self, pageIndex=1, pageSize=10, order_by="SEARCH_TITLE"):
 		result = []
 		to_skip = []
-		for show in self.db.get_tables_items(Shows):
+		for show in self.db.get_tables_items(Shows, order_by=order_by, limit=pageSize, where="ID > %s" % ((pageIndex-1)*pageSize)):
 			try:
 				if show.id in to_skip:
 					_LOGGER.info("Skipping episode %s", show)
