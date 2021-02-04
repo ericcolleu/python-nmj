@@ -26,13 +26,14 @@ def build_image_from_directory(width=200, height=200, directory="."):
 	pass
 
 class NMJMedia(object):
-	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper=""):
+	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper="", thumbnail=""):
 		self.title = title
 		self.search_title = search_title or title
 		self.show_id = show_id
 		self.synopsis = synopsis
 		self.poster = poster
 		self.wallpaper = wallpaper
+		self.thumbnail = thumbnail
 		
 	def jsondetails(self):
 		return {
@@ -41,16 +42,17 @@ class NMJMedia(object):
 				"synopsis" : to_unicode(self.synopsis),
 				"poster" : self.poster,
 				"wallpaper" : self.wallpaper,
+				"thumbnail" : self.thumbnail,
 				"id" : self.show_id,
 		}
 
 class NMJEpisode(NMJMedia):
-	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper=""):
-		super(NMJEpisode, self).__init__(title, show_id, synopsis, poster, search_title=search_title, wallpaper=wallpaper)
+	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper="", thumbnail=""):
+		super(NMJEpisode, self).__init__(title, show_id, synopsis, poster, search_title=search_title, wallpaper=wallpaper, thumbnail=thumbnail)
 		
 class NMJSeason(NMJMedia):
-	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper="", episodes=None):
-		super(NMJSeason, self).__init__(title, show_id, synopsis, poster, search_title=search_title, wallpaper=wallpaper)
+	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper="", episodes=None, thumbnail=""):
+		super(NMJSeason, self).__init__(title, show_id, synopsis, poster, search_title=search_title, wallpaper=wallpaper, thumbnail=thumbnail)
 		self.episodes = episodes or []
 		
 	def jsondetails(self):
@@ -61,8 +63,8 @@ class NMJSeason(NMJMedia):
 		return result
 		
 class NMJShow(NMJMedia):
-	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper="", seasons=None):
-		super(NMJShow, self).__init__(title, show_id, synopsis, poster, search_title=search_title, wallpaper=wallpaper)
+	def __init__(self, title, show_id, synopsis, poster, search_title=None, wallpaper="", thumbnail="", seasons=None):
+		super(NMJShow, self).__init__(title, show_id, synopsis, poster, search_title=search_title, wallpaper=wallpaper, thumbnail=thumbnail)
 		self.seasons = seasons or []
 
 	def jsondetails(self):
@@ -305,6 +307,7 @@ document.write('<meta HTTP-EQUIV="REFRESH" content="0; url='+fixedPath.replace("
 					poster=self.db.get_first(VideoPosters, id=show.id).poster,
 					search_title=show.search_title,
 					wallpaper=self.db.get_first(VideoPosters, id=show.id).wallpaper,
+					thumbnail=self.db.get_first(VideoPosters, id=show.id).thumbnail,
 					seasons=seasons,
 				))
 			except:
